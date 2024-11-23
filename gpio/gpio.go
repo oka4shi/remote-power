@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"sync"
 )
 
 type Port struct {
-	Pin int
+	Mu     sync.Mutex
+	Pin    int
+	Locked bool
 }
 
 func isPortReady(pin int) bool {
@@ -39,6 +42,23 @@ func NewPort(bank Bank, group Group, x X) (*Port, error) {
 var directionMap = map[Direction]string{
 	IN:  "in",
 	OUT: "out",
+}
+
+func (p *Port) Lock() error {
+	p.Mu.Lock()
+	if p.Locked {
+		return errors.New("Already locked")
+	}
+
+	p.Locked = true
+	p.Mu.Unlock()
+	return nil
+}
+
+func (p *Port) Unlock() {
+	p.Mu.Lock()
+	p.Locked = false
+	p.Mu.Unlock()
 }
 
 func (p *Port) SetDirection(value Direction) error {

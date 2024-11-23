@@ -1,14 +1,17 @@
 package main
 
 import (
-	"github.com/oka4shi/remote-power/gpio"
+	"github.com/oka4shi/remote-power/server"
+	"log"
+	"net/http"
 )
 
 func main() {
-	p, err := gpio.NewPort(gpio.BANK_3, gpio.GROUP_C, gpio.X_5, gpio.OUT)
-	if err != nil {
-		panic("やばい!")
-	}
 
-	p.DegitalWrite(gpio.HIGH)
+	http.HandleFunc("GET /", server.Home)
+	//http.HandleFunc("POST /power", server.Home)
+	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("server/template/static"))))
+
+	log.Print(http.ListenAndServe(":8080", nil))
+
 }
