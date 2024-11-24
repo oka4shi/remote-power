@@ -11,6 +11,7 @@ type Bank int
 
 const (
 	BANK_0 Bank = iota
+	BANK_1
 	BANK_2
 	BANK_3
 	BANK_4
