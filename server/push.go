@@ -67,7 +67,7 @@ func pushButton(process *Process, isLong bool) {
 }
 
 func Push(w http.ResponseWriter, r *http.Request) {
-	isLong := len(r.URL.Query().Get("long")) != 0
+	isLong := r.URL.Query().Has("long")
 
 	// Lock a GPIO port(return 409 error if it's being used)
 	if err := p.Lock(); err != nil {
