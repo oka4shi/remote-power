@@ -26,10 +26,10 @@ var p *gpio.Port
 func init() {
 	port, err := gpio.NewPort(gpio.BANK_3, gpio.GROUP_C, gpio.X_5)
 	if err != nil {
-		panic("やばい!")
+		panic("Failed to intialize GPIO")
 	}
 	if err := p.SetDirection(gpio.OUT); err != nil {
-		panic("やばい！")
+		panic("Failed to set the direction of GPIO")
 	}
 
 	p = port
