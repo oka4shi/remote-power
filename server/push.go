@@ -99,7 +99,7 @@ func PushStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return "Completed" if token isn't correct
-	if process.token == token {
+	if process.token != token {
 		io.WriteString(w, "Completed or token isn't correct")
 		return
 	}
