@@ -3,6 +3,7 @@ const pushButton = document.getElementById("push")
 /** @type {HTMLButtonElement | null}*/
 const longPushButton = document.getElementById("long-push")
 const message = document.getElementById("message")
+const spinner = document.getElementById("spinner")
 
 /** @param {string} path
 *   @param {RequestInit} init 
@@ -34,6 +35,8 @@ async function fetchAPI(path, init) {
 
 /** @param {boolean} isLong */
 async function buttonClickHandler(isLong) {
+    spinner.classList.remove("check")
+    spinner.classList.add("animate")
     message.innerText = ``
     pushButton.disabled = true
     longPushButton.disabled = true
@@ -44,12 +47,11 @@ async function buttonClickHandler(isLong) {
     if (token instanceof Error) {
         message.innerText = token.message
         message.classList.add("error")
+        spinner.classList.remove("animate")
         pushButton.disabled = false
         longPushButton.disabled = false
         return
     }
-
-    console.log(token)
 
     const result = await fetchAPI(`/push/status`, {
         method: "GET",
@@ -60,6 +62,7 @@ async function buttonClickHandler(isLong) {
     if (result instanceof Error) {
         message.innerText = result.message
         message.classList.add("error")
+        spinner.classList.remove("animate")
         pushButton.disabled = false
         longPushButton.disabled = false
         return
@@ -67,6 +70,8 @@ async function buttonClickHandler(isLong) {
     
     message.innerText = `操作が完了しました`
     message.classList.remove("error")
+    spinner.classList.remove("animate")
+    spinner.classList.add("check")
     pushButton.disabled = false
     longPushButton.disabled = false
 
