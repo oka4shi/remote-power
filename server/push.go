@@ -5,6 +5,7 @@ import (
 	"io"
 	"math/rand/v2"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -24,6 +25,11 @@ var process = &Process{}
 var p *gpio.Port
 
 func init() {
+	dryRun := os.Getenv("DRY_RUN")
+	if dryRun == "true" || dryRun == "TRUE" {
+		gpio.DryRun = true
+	}
+
 	port, err := gpio.NewPort(gpio.BANK_3, gpio.GROUP_C, gpio.X_5)
 	if err != nil {
 		panic("Failed to intialize GPIO")

@@ -47,9 +47,6 @@ func NewPort(bank Bank, group Group, x X) (*Port, error) {
 	p := Port{
 		Pin: pin,
 	}
-	if DryRun {
-		return &p, nil
-	}
 
 	if !doesFileExist("/sys/class/gpio/export") {
 		return nil, errors.New("Can't use GPIO")
