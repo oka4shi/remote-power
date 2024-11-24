@@ -72,19 +72,19 @@ var directionMap = map[Direction]string{
 
 func (p *Port) Lock() error {
 	p.Mu.Lock()
+	defer p.Mu.Unlock()
 	if p.Locked {
 		return errors.New("Already locked")
 	}
 
 	p.Locked = true
-	p.Mu.Unlock()
 	return nil
 }
 
 func (p *Port) Unlock() {
 	p.Mu.Lock()
+	defer p.Mu.Unlock()
 	p.Locked = false
-	p.Mu.Unlock()
 }
 
 func (p *Port) SetDirection(value Direction) error {
