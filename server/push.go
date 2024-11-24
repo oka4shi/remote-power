@@ -34,7 +34,7 @@ func init() {
 	if err != nil {
 		panic("Failed to intialize GPIO")
 	}
-	if err := p.SetDirection(gpio.OUT); err != nil {
+	if err := port.SetDirection(gpio.OUT); err != nil {
 		panic("Failed to set the direction of GPIO")
 	}
 
