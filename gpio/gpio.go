@@ -33,8 +33,8 @@ func doesFileExist(path string) bool {
 		return true
 	}
 
-	gpioFile, err := os.Stat(path)
-	return err == nil && gpioFile.IsDir()
+	_, err := os.Stat(path)
+	return err == nil
 
 }
 
