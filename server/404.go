@@ -5,5 +5,5 @@ import (
 )
 
 func notFound(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "server/template/404.html")
+	http.ServeFile(w, r, "template/404.html")
 }

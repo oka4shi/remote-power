@@ -7,7 +7,7 @@ import (
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("server/template/index.html")
+	t, err := template.ParseFiles("template/index.html")
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusNotFound)
