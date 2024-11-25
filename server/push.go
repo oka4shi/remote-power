@@ -30,7 +30,7 @@ func init() {
 		gpio.DryRun = true
 	}
 
-	port, err := gpio.NewPort(gpio.BANK_3, gpio.GROUP_C, gpio.X_5)
+	port, err := gpio.NewPort(gpio.BANK_4, gpio.GROUP_C, gpio.X_5)
 	if err != nil {
 		panic("Failed to intialize GPIO")
 	}
