@@ -175,9 +175,9 @@ func parseNetlinkMsg(b []byte, offset int) Nlmsghdr {
 }
 
 func bytesToUint16(b []byte, offset, start, size int) uint16 {
-	return binary.BigEndian.Uint16(b[offset+start : offset+start+size])
+	return binary.LittleEndian.Uint16(b[offset+start : offset+start+size])
 }
 
 func bytesToUint32(b []byte, offset, start, size int) uint32 {
-	return binary.BigEndian.Uint32(b[offset+start : offset+start+size])
+	return binary.LittleEndian.Uint32(b[offset+start : offset+start+size])
 }
