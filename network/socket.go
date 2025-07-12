@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"unsafe"
 
 	syscall "golang.org/x/sys/unix"
 )
@@ -104,7 +103,7 @@ func getIfaceStatus(name string) (NetworkStatus, error) {
 	}
 }
 
-func newNetlinkSocket() error {
+func NewNetlinkSocket() error {
 	fd, err := syscall.Socket(syscall.AF_NETLINK, syscall.SOCK_RAW, syscall.NETLINK_ROUTE)
 	if err != nil {
 		return err
@@ -143,13 +142,21 @@ func newNetlinkSocket() error {
 		return err
 	}
 
-	for offset := 0; offset+nlmsgSize <= n; offset += nlmsgSize {
+	for offset := 0; offset+nlmsgSize <= n; {
 		nh := parseNetlinkMsg(buff, offset)
+
+		end := offset + int(nh.NlmsgLen)
+		fmt.Printf("from %d to %d of %d bytes\n", offset, end, n)
 		if nh.NlmsgType == syscall.NLMSG_DONE {
 			break
 		}
 
-		fmt.Println(nh.NlmsgType)
+		if offset == 0 {
+			fmt.Printf("%v#\n", nh)
+		}
+		fmt.Printf("%X\n", buff[offset+nlmsgSize:end])
+
+		offset += int(nh.NlmsgLen)
 
 	}
 
