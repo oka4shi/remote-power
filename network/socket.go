@@ -8,7 +8,7 @@ import (
 	syscall "golang.org/x/sys/unix"
 )
 
-func WatchNetlinkSocket() error {
+func WatchNetlinkSocket(c chan []byte) error {
 	fd, err := syscall.Socket(syscall.AF_NETLINK, syscall.SOCK_RAW, syscall.NETLINK_ROUTE)
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func WatchNetlinkSocket() error {
 		return err
 	}
 
-	pfds := []syscall.PollFd{syscall.PollFd{
+	pfds := []syscall.PollFd{{
 		Fd:      int32(fd),
 		Events:  syscall.POLLIN,
 		Revents: 0,
@@ -39,32 +39,38 @@ func WatchNetlinkSocket() error {
 		return err
 	}
 
-	buff := make([]byte, 4096)
-	oob := make([]byte, 0)
+	for {
+		buff := make([]byte, 4096)
+		oob := make([]byte, 0)
 
-	n, _, _, _, err := syscall.Recvmsg(fd, buff, oob, 0)
-	if err != nil {
-		return err
-	}
-
-	for offset := 0; offset+nlmsgSize <= n; {
-		nh := parseNetlinkMsg(buff, offset)
-
-		end := offset + int(nh.NlmsgLen)
-		log.Printf("Reading %d – %d (total: %d bytes)\n", offset, end, n)
-		log.Printf("nlmsgLen: %d, nlmsgType: 0x%X, nlmsgFlags: 0x%X, nlmsgSeq: %d, nlmsgPid: %d\n",
-			nh.NlmsgLen, nh.NlmsgType, nh.NlmsgFlags, nh.NlmsgSeq, nh.NlmsgPid)
-
-		if nh.NlmsgType == syscall.NLMSG_DONE {
-			break
+		n, _, _, _, err := syscall.Recvmsg(fd, buff, oob, 0)
+		log.Printf("Got a message from a netlink socket:")
+		if err != nil {
+			return err
 		}
 
-		log.Printf("%X\n", buff[offset+nlmsgSize:end])
+		for offset := 0; offset+nlmsgSize <= n; {
+			nh := parseNetlinkMsg(buff, offset)
 
-		offset += int(nh.NlmsgLen)
+			end := offset + int(nh.NlmsgLen)
+			log.Printf("Reading %d – %d (total: %d bytes)\n", offset, end, n)
+			log.Printf("nlmsgLen: %d, nlmsgType: 0x%X, nlmsgFlags: 0x%X, nlmsgSeq: %d, nlmsgPid: %d\n",
+				nh.NlmsgLen, nh.NlmsgType, nh.NlmsgFlags, nh.NlmsgSeq, nh.NlmsgPid)
+
+			if nh.NlmsgType == syscall.NLMSG_DONE {
+				break
+			}
+
+			payload := buff[offset+nlmsgSize : end]
+
+			if nh.NlmsgType == syscall.NLMSG_MIN_TYPE {
+				log.Printf("%X\n", payload)
+				c <- payload
+			}
+
+			offset += int(nh.NlmsgLen)
+		}
 	}
-
-	return nil
 }
 
 func parseNetlinkMsg(b []byte, offset int) Nlmsghdr {
