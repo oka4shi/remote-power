@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -74,7 +74,7 @@ func ListPhisicalIfaces(root string) ([]string, error) {
 		return nil
 
 	})
-	sort.Slice(findList, func(i, j int) bool { return findList[i] < findList[j] })
+	slices.Sort(findList)
 	return findList, err
 }
 
