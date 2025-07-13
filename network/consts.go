@@ -3,8 +3,9 @@ package network
 type NetworkStatus int
 
 const (
-	Down NetworkStatus = 0
-	Up   NetworkStatus = 1
+	Unknown NetworkStatus = -1
+	Down    NetworkStatus = 0
+	Up      NetworkStatus = 1
 )
 
 const (
