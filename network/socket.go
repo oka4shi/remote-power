@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"log"
 
 	syscall "golang.org/x/sys/unix"
 )
@@ -146,18 +147,17 @@ func NewNetlinkSocket() error {
 		nh := parseNetlinkMsg(buff, offset)
 
 		end := offset + int(nh.NlmsgLen)
-		fmt.Printf("from %d to %d of %d bytes\n", offset, end, n)
+		log.Printf("Reading %d – %d (total: %d bytes)\n", offset, end, n)
+		log.Printf("nlmsgLen: %d, nlmsgType: 0x%X, nlmsgFlags: 0x%X, nlmsgSeq: %d, nlmsgPid: %d\n",
+			nh.NlmsgLen, nh.NlmsgType, nh.NlmsgFlags, nh.NlmsgSeq, nh.NlmsgPid)
+
 		if nh.NlmsgType == syscall.NLMSG_DONE {
 			break
 		}
 
-		if offset == 0 {
-			fmt.Printf("%v#\n", nh)
-		}
-		fmt.Printf("%X\n", buff[offset+nlmsgSize:end])
+		log.Printf("%X\n", buff[offset+nlmsgSize:end])
 
 		offset += int(nh.NlmsgLen)
-
 	}
 
 	return nil
