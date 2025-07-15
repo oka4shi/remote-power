@@ -19,9 +19,13 @@ var port = (func() string {
 })()
 
 func main() {
+	go server.WatchIfaces()
+
 	http.HandleFunc("GET /", server.Home)
 	http.HandleFunc("POST /push", server.Push)
 	http.HandleFunc("GET /push/status", server.PushStatus)
+	http.HandleFunc("GET /network/status", server.NetworkStatus)
+	http.HandleFunc("GET /network/watch", server.NetworkWatch)
 	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir(path.Join(server.TemplateDir, "/static")))))
 
 	log.Print(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
