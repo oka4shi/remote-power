@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 
 	"github.com/oka4shi/remote-power/server"
 )
@@ -19,10 +18,13 @@ var port = (func() string {
 })()
 
 func main() {
-	http.HandleFunc("GET /", server.Home)
+	go server.WatchIfaces()
+
+	http.Handle("GET /", http.FileServer(http.Dir(server.TemplateDir)))
 	http.HandleFunc("POST /push", server.Push)
 	http.HandleFunc("GET /push/status", server.PushStatus)
-	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir(path.Join(server.TemplateDir, "/static")))))
+	http.HandleFunc("GET /network/status", server.NetworkStatus)
+	http.HandleFunc("GET /network/watch", server.NetworkWatch)
 
 	log.Print(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 
