@@ -15,7 +15,7 @@ import (
 type Ifaces struct {
 	mu         sync.Mutex      `json:"-"`
 	Ifaces     *network.Ifaces `json:"ifaces"`
-	UpdateTime time.Time       `json:"update_time"`
+	UpdateTime time.Time       `json:"updated_at"`
 	Error      bool            `json:"error"`
 }
 

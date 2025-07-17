@@ -9,11 +9,11 @@
 </script>
 
 <svg
-  class={[
-    "spinner",
-    status === "loading" && "animate",
-    status === "done" && "check"
-  ]}
+  class={{
+    spinner: true,
+    animate: status === "loading",
+    check: status === "done"
+  }}
   viewBox="0 0 40 40"
   height="40"
   width="40"

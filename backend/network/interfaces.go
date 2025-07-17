@@ -12,8 +12,8 @@ import (
 )
 
 type Iface struct {
-	Name   string
-	Status NetworkStatus
+	Name   string        `json:"name"`
+	Status NetworkStatus `json:"status"`
 }
 
 type Ifaces []*Iface

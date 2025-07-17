@@ -1,9 +1,10 @@
 <script lang="ts">
   import PushButton from "./lib/PowerButton.svelte";
   import Spinner from "./lib/Spinner.svelte";
+  import NetworkStatus from "./lib/NetworkStatus.svelte";
 
   import { fetchAPI } from "./lib/fetch";
-  import type { SpinnerStatuses } from "./lib/types";
+  import type { SpinnerStatuses, NetworkStatusResponse } from "./lib/types";
 
   let status = $state<SpinnerStatuses>("none");
   let disabled = $state(false);
@@ -62,16 +63,20 @@
   <h1>電源管理ツール</h1>
   <p>自宅のデスクトップPCの電源を管理します</p>
 
-  <h2>電源ボタンを押す</h2>
-  <div id="control">
-    <PushButton isLong={false} {push} {disabled} />
-    <PushButton isLong={true} {push} {disabled} />
-  </div>
+  <section>
+    <h2>電源ボタンを押す</h2>
+    <div id="control">
+      <PushButton isLong={false} {push} {disabled} />
+      <PushButton isLong={true} {push} {disabled} />
+    </div>
 
-  <section id="status">
-    <Spinner {status} />
-    <p class={[{ error: message.isError }]}>{message.message}</p>
+    <div id="status">
+      <Spinner {status} />
+      <p class={[{ error: message.isError }]}>{message.message}</p>
+    </div>
   </section>
+
+  <NetworkStatus />
 </main>
 
 <style>
