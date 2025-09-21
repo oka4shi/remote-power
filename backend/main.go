@@ -25,6 +25,7 @@ func main() {
 	http.HandleFunc("GET /push/status", server.PushStatus)
 	http.HandleFunc("GET /network/status", server.NetworkStatus)
 	http.HandleFunc("GET /network/watch", server.NetworkWatch)
+	http.HandleFunc("GET /network/watch/stream", server.NetworkWatchStream)
 
 	log.Print(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 
