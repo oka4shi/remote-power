@@ -1,6 +1,9 @@
 <script lang="ts">
   import type { NetworkStatusResponse } from "./types";
-  import { fetchAPI } from "./fetch";
+  import { fetchAPI, startStream } from "./fetch";
+
+  let pulse = $state<boolean>(false);
+  let isActive = $state<boolean>(false);
 
   let networkStatus = $state<NetworkStatusResponse>({
     ifaces: [],
@@ -33,9 +36,6 @@
     }
     resetCounter();
   }
-  (async () => {
-    await updateNetworkStatus();
-  })();
 
   function getOffsetString(dt1: Date, dt2: Date) {
     const offsetTs = dt1.getTime() - dt2.getTime();
@@ -69,34 +69,60 @@
   }
 
   (async () => {
-    watch();
+    startStream(
+      "/network/watch/stream",
+      1500,
+      1000,
+      (path, retryTimes) => {
+        console.log(
+          `Starting stream from: ${path} (retrying ${retryTimes} times)`
+        );
+        pulse = false;
+        requestAnimationFrame(() => {
+          pulse = true;
+        });
+      },
+      (event) => {
+        isActive = true;
+        console.log("Stream opened:", event);
+      },
+      (data) => {
+        try {
+          const payload = JSON.parse(data);
+          networkStatus = payload as NetworkStatusResponse;
+          resetCounter();
+        } catch {
+          // 握りつぶす
+        }
+      },
+      () => {
+        pulse = false;
+        requestAnimationFrame(() => {
+          pulse = true;
+        });
+        resetCounter();
+      },
+      (message) => {
+        isActive = false;
+        console.log("Timeout!:", message);
+      }
+    );
+
     await updateNetworkStatus();
   })();
-
-  async function watch() {
-    while (true) {
-      const result = await fetchAPI("/network/watch", {
-        method: "GET"
-      });
-      if (result instanceof Error) {
-        return;
-      }
-
-      try {
-        const payload = JSON.parse(result);
-        networkStatus = payload as NetworkStatusResponse;
-        resetCounter();
-      } catch {
-        // 握りつぶす
-      }
-    }
-  }
 </script>
 
 <section>
   <h2>ネットワークの状態</h2>
   <div>
     <div class="status">
+      <!-- Switch element itself to trigger animation correctly -->
+      <!-- TODO: a11y -->
+      {#if pulse}
+        <div class={["pulser", "pulse-animation", !isActive && "dead"]}></div>
+      {:else}
+        <div class={["pulser", !isActive && "dead"]}></div>
+      {/if}
       <p>最終更新: {latestUpdate}</p>
       <button onclick={updateNetworkStatus}>今すぐ更新</button>
     </div>
@@ -126,6 +152,18 @@
 </section>
 
 <style>
+  .pulse-animation {
+    animation: pulse 1s;
+  }
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
+    }
+    100% {
+      box-shadow: 0 0 0 0.75rem rgba(0, 0, 0, 0);
+    }
+  }
+
   .status {
     display: flex;
     align-items: center;
@@ -145,6 +183,18 @@
     button:hover {
       border: 2px solid var(--primary-color);
       transition: border 100ms ease-in;
+    }
+
+    .pulser {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      box-shadow: 0px 0px 1px 1px #0000001a;
+      background-color: orange;
+      margin: 1rem;
+      &.dead {
+        background-color: var(--font-gray);
+      }
     }
   }
   .error {
