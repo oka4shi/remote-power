@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { NetworkStatusResponse } from "./types";
   import { fetchAPI, startStream } from "./fetch";
+  import ReloadIcon from "./assets/reload.svelte";
 
   let pulse = $state<boolean>(false);
   let isActive = $state<boolean>(false);
@@ -124,7 +125,9 @@
         <div class={["pulser", !isActive && "dead"]}></div>
       {/if}
       <p>最終更新: {latestUpdate}</p>
-      <button onclick={updateNetworkStatus}>今すぐ更新</button>
+      <button onclick={updateNetworkStatus} aria-label="今すぐ更新">
+        <ReloadIcon />
+      </button>
     </div>
     {#if networkStatus.error}
       <p class="error">ネットワークの状態を取得できませんでした</p>
@@ -167,6 +170,7 @@
   .status {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 
     button {
       font-size: 0.875rem;
@@ -187,7 +191,7 @@
 
     .pulser {
       width: 1.5rem;
-      height: 1.5rem;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       box-shadow: 0px 0px 1px 1px #0000001a;
       background-color: orange;
