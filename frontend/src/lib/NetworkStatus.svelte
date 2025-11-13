@@ -72,7 +72,7 @@
     startStream(
       "/network/watch/stream",
       1500,
-      1000,
+      [2500, 3000, 5000, 10000],
       (path, retryTimes) => {
         console.log(
           `Starting stream from: ${path} (retrying ${retryTimes} times)`
