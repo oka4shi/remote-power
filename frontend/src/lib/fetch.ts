@@ -28,7 +28,7 @@ export async function fetchAPI(path: string, init: RequestInit) {
 export function startStream(
   path: string,
   timeout: number,
-  retryIn: number,
+  retryTimings: number[],
   onStart: (path: string, retryTimes: number) => void,
   onOpen: (event: Event) => void,
   onMessage: (data: string) => void,
@@ -40,16 +40,14 @@ export function startStream(
   let errorTimeout: number | undefined = undefined;
   const eventSource = new EventSource(path);
 
-  errorTimeout = setTimeout(
-    () => {
-      onTimeout(
-        `Can't connect to stream in ${retryIn * (retryTimes * 0.5 + 1)} milliseconds`
-      );
+  const waitAndRetry = (time: number) => {
+    return setTimeout(() => {
+      onTimeout(`Can't connect to stream in ${time} milliseconds`);
       stopStream(eventSource, errorTimeout);
       startStream(
         path,
         timeout,
-        retryIn,
+        retryTimings,
         onStart,
         onOpen,
         onMessage,
@@ -57,10 +55,12 @@ export function startStream(
         onTimeout,
         retryTimes + 1
       );
-    },
-    retryIn * (retryTimes * 0.5 + 1)
-  );
+    }, time);
+  };
 
+  errorTimeout = waitAndRetry(
+    retryTimings[Math.min(retryTimes, retryTimings.length - 1)]
+  );
   eventSource.onopen = (event) => {
     clearTimeout(errorTimeout);
     retryTimes = 0;
@@ -82,7 +82,7 @@ export function startStream(
       startStream(
         path,
         timeout,
-        retryIn,
+        retryTimings,
         onStart,
         onOpen,
         onMessage,
@@ -95,18 +95,8 @@ export function startStream(
   eventSource.onerror = () => {
     onTimeout("Stream error occurred");
     clearTimeout(errorTimeout);
-
-    // Retry connection instantly
-    stopStream(eventSource, errorTimeout);
-    startStream(
-      path,
-      timeout,
-      retryIn,
-      onStart,
-      onOpen,
-      onMessage,
-      onHeartbeat,
-      onTimeout
+    errorTimeout = waitAndRetry(
+      retryTimings[Math.min(retryTimes, retryTimings.length - 1)]
     );
   };
 
