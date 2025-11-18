@@ -32,7 +32,7 @@ export function startStream(
   onStart: (path: string, retryTimes: number) => void,
   onOpen: (event: Event) => void,
   onMessage: (data: string) => void,
-  onHeartbeat: () => void,
+  onHeartbeat: (lastUpdated: Date) => void,
   onTimeout: (message: string) => void,
   retryTimes: number = 0
 ): EventSource | null {
@@ -72,9 +72,9 @@ export function startStream(
     onMessage(event.data);
   };
 
-  eventSource.addEventListener("heartbeat", () => {
+  eventSource.addEventListener("heartbeat", (event) => {
     clearTimeout(errorTimeout);
-    onHeartbeat();
+    onHeartbeat(new Date(String(event.data).trim()));
 
     errorTimeout = setTimeout(() => {
       onTimeout(`No heartbeat received in ${timeout} milliseconds`);
