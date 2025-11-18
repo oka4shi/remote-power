@@ -163,6 +163,10 @@ func NetworkWatchStream(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
+	// Send initial newline to establish the stream
+	io.WriteString(w, "\n\n")
+	flusher.Flush()
+
 	pingTicker := time.NewTicker(1 * time.Second)
 
 	for {
