@@ -174,7 +174,9 @@ func NetworkWatchStream(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 		case <-pingTicker.C:
 			fmt.Fprintf(w, "event: heartbeat\n")
-			fmt.Fprintf(w, "data: \n\n")
+			ifaces.mu.Lock()
+			fmt.Fprintf(w, "data: %s\n\n", ifaces.UpdateTime.Format(time.RFC3339))
+			ifaces.mu.Unlock()
 			flusher.Flush()
 		case <-r.Context().Done():
 			clients.mu.Lock()

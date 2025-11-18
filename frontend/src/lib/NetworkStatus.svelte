@@ -34,6 +34,7 @@
         error: true
       };
     }
+    latestUpdate = new Date(networkStatus.updated_at);
     resetCounter();
   }
 
@@ -53,7 +54,8 @@
     }
   }
 
-  let latestUpdate = $state("");
+  let latestUpdate = new Date();
+  let updatedBefore = $state("");
 
   let fetched_at = new Date();
   const intervals: number[] = [];
@@ -61,11 +63,11 @@
     intervals.forEach((id) => clearInterval(id));
     fetched_at = new Date();
     const interval = setInterval(() => {
-      latestUpdate = getOffsetString(new Date(), fetched_at);
+      updatedBefore = getOffsetString(new Date(), fetched_at);
     }, 5000);
     intervals.push(interval);
 
-    latestUpdate = getOffsetString(new Date(), fetched_at);
+    updatedBefore = getOffsetString(new Date(), fetched_at);
   }
 
   (async () => {
@@ -90,12 +92,19 @@
         try {
           const payload = JSON.parse(data);
           networkStatus = payload as NetworkStatusResponse;
+          latestUpdate = new Date(networkStatus.updated_at);
           resetCounter();
         } catch {
           // 握りつぶす
         }
       },
-      () => {
+      async (lastUpdated) => {
+        console.log(
+          `Last Updated(Server): ${lastUpdated}\nLast Updated(Client): ${latestUpdate}`
+        );
+        if (latestUpdate < lastUpdated) {
+          await updateNetworkStatus();
+        }
         pulse = false;
         requestAnimationFrame(() => {
           pulse = true;
@@ -123,7 +132,7 @@
       {:else}
         <div class={["pulser", !isActive && "dead"]}></div>
       {/if}
-      <p>最終更新: {latestUpdate}</p>
+      <p>最終更新: {updatedBefore}</p>
       <button onclick={updateNetworkStatus}>今すぐ更新</button>
     </div>
     {#if networkStatus.error}
